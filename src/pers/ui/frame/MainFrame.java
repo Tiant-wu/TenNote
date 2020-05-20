@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,6 +49,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
+import Knowledge.Knowledge;
+import Knowledge.KnowledgeManager;
 import pers.ui.abs.AbstractFrame;
 import pers.ui.dialog.FindDialog;
 import pers.ui.dialog.FontDialog;
@@ -73,7 +76,7 @@ public class MainFrame extends AbstractFrame
 	//树形目录右键弹出菜单
 	private JPopupMenu treePopupMenu;
 	//树形目录右键弹出菜单项
-	private JMenuItem treePopupMenu_NewChildDir,treePopupMenu_DeleteChildDir;
+	private JMenuItem treePopupMenu_NewChildDir,treePopupMenu_DeleteChildDir, treePopupMenu_OpenKnowledge;
 	
 	// 菜单
 	private JMenu fileMenu, editMenu, formatMenu, viewMenu, helpMenu;
@@ -118,7 +121,7 @@ public class MainFrame extends AbstractFrame
 	/*
 	 * 构造方法
 	 */
-	public MainFrame()
+	public MainFrame() throws FileNotFoundException
 	{
 		// 初始化界面
 		initUI();
@@ -128,9 +131,11 @@ public class MainFrame extends AbstractFrame
 
 	/**
 	 * 初始化界面
+	 * @throws FileNotFoundException 
 	 */
-	private void initUI()
+	private void initUI() throws FileNotFoundException
 	{
+		KnowledgeManager.loadKnowledge();
 		// 设置标题
 		setTitle("Java记事本");
 		// 设置位置和大小
@@ -495,6 +500,10 @@ public class MainFrame extends AbstractFrame
 		//树形目录右键菜单
 		treePopupMenu = new JPopupMenu();
 		
+		treePopupMenu_OpenKnowledge = new JMenuItem("打开知识");
+		treePopupMenu_OpenKnowledge.addActionListener(this);
+		treePopupMenu.add(treePopupMenu_OpenKnowledge);
+		
 		treePopupMenu_NewChildDir = new JMenuItem("新建子目录");
 		treePopupMenu_NewChildDir.addActionListener(this);
 		treePopupMenu.add(treePopupMenu_NewChildDir);
@@ -523,12 +532,10 @@ public class MainFrame extends AbstractFrame
 		tree.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				if(e.getButton() == e.BUTTON3) {
-					
 					treePopupMenu.show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
 		});
-		
 	}
 
 	/**
@@ -581,33 +588,20 @@ public class MainFrame extends AbstractFrame
 	public void actionPerformed(ActionEvent e)
 	{
 		// 判断来源
-		if (e.getSource() == fileMenu_NewDir) {
-			createNewDir();
-		}else if(e.getSource() == treePopupMenu_NewChildDir) {
-			createNewChildDir();
-		}else if(e.getSource() == treePopupMenu_DeleteChildDir) {
-			deleteChildDir();
-	    }else if (e.getSource() == fileMenu_New)
+		if (e.getSource() == fileMenu_NewDir) {createNewDir();}
+		else if(e.getSource() == treePopupMenu_NewChildDir) {createNewChildDir();}
+		else if(e.getSource() == treePopupMenu_OpenKnowledge) {openKnowledge();}
+		else if(e.getSource() == treePopupMenu_DeleteChildDir) {deleteChildDir();}
+		// 创建新文件
+		else if (e.getSource() == fileMenu_New) {createNewFile();}
+		// 打开文件
+		else if (e.getSource() == fileMenu_Open){open();}
+		else if (e.getSource() == fileMenu_Save)
 		{
-			// 创建新文件
-			createNewFile();
-		} else if (e.getSource() == fileMenu_Open)
-		{
-			// 打开文件
-			open();
-		} else if (e.getSource() == fileMenu_Save)
-		{
-			// 如果是新文件
-			if (isNewFile)
-			{
-				// 保存文件
-				save();
-			} else
-			{
-				// 否则直接写文件
-				FileUtil.writeFile(currentFile, editArea.getText());
-			}
-
+			// 如果是新文件就保存
+			if (isNewFile){save();}
+			// 否则直接写文件
+			else{FileUtil.writeFile(currentFile, editArea.getText());}
 		} else if (e.getSource() == fileMenu_SaveAs)
 		{
 			// 另存为
@@ -1280,6 +1274,14 @@ public class MainFrame extends AbstractFrame
             validate();
 	    }
 	}
+	
+	private void openKnowledge()
+	{
+		DefaultMutableTreeNode select=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+		String text=KnowledgeManager.knowledges.get(select.getUserObject().toString());
+		editArea.setText(text);
+	}
+	
 	/*
 	 * 新建子目录
 	 */
@@ -1296,15 +1298,13 @@ public class MainFrame extends AbstractFrame
             TreePath treePath=new TreePath(treeNode);
             tree.scrollPathToVisible(treePath);
             validate();
-            
-	    
 	    }
 	}
 	
 	/*
 	 * 删除子目录
 	 */
-	void deleteChildDir() {
+	private void deleteChildDir() {
 		 DefaultMutableTreeNode select=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
          if(select!=null )
              model.removeNodeFromParent(select);
@@ -1319,17 +1319,15 @@ public class MainFrame extends AbstractFrame
              FileOutputStream fout=new FileOutputStream("address.bat");
              ObjectOutputStream out=new ObjectOutputStream(fout);
              out.writeObject(tree);
-         }catch(Exception ed){
-        	 
-         }
+             out.close();
+         }catch(Exception ed) {}
 	}
 	private void loadTree() {
 		 try{
              FileInputStream fin=new FileInputStream("address.bat");
              ObjectInputStream in=new ObjectInputStream(fin);
              tree=(JTree)in.readObject();
-           }catch(Exception er){
-        	   
-           }
+             in.close();
+           }catch(Exception er) {}
 	}
 }
