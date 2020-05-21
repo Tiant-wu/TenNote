@@ -1,7 +1,10 @@
 package pers.jnotepad;
 
+<<<<<<< HEAD
 import java.io.FileNotFoundException;
 
+=======
+>>>>>>> f9918554b2c6ddbc63351b2aedca6ae13a738c41
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -16,7 +19,11 @@ import pers.ui.frame.MainFrame;
  */
 public class JavaNotepad
 {
+<<<<<<< HEAD
 	public static void main(String[] args) throws FileNotFoundException
+=======
+	public static void main(String[] args)
+>>>>>>> f9918554b2c6ddbc63351b2aedca6ae13a738c41
 	{
 		
 
