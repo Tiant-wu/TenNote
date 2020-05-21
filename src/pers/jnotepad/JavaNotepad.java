@@ -1,5 +1,6 @@
 package pers.jnotepad;
 
+import java.io.FileNotFoundException;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -14,11 +15,8 @@ import pers.ui.frame.MainFrame;
  */
 public class JavaNotepad
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws FileNotFoundException
 	{
-		
-
-		
 		// 设置窗口风格样式
 		
 		try
