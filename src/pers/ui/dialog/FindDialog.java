@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 import pers.ui.abs.AbstractDialog;
 
@@ -34,14 +35,14 @@ public class FindDialog extends AbstractDialog
 	private JCheckBox matchCheckBox;
 	private JRadioButton upButton;
 	private JRadioButton downButton;
-	private JTextArea editArea;
+	private JTextPane editArea;
 
 	/*
 	 * 构造方法
 	 */
-	private FindDialog(JTextArea editArea)
+	private FindDialog(JTextPane editArea2)
 	{
-		this.editArea = editArea;
+		this.editArea = editArea2;
 		// 初始化界面
 		initUI();
 	}
@@ -49,12 +50,12 @@ public class FindDialog extends AbstractDialog
 	/*
 	 * 获取实例对象
 	 */
-	public static FindDialog getInstance(JTextArea editArea)
+	public static FindDialog getInstance(JTextPane editArea2)
 	{
 		// 为空
 		if (INSTANCE == null)
 		{
-			INSTANCE = new FindDialog(editArea);
+			INSTANCE = new FindDialog(editArea2);
 		}
 
 		// 返回实例对象

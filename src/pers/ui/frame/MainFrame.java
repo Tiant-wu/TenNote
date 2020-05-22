@@ -1,6 +1,7 @@
 package pers.ui.frame;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -35,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
@@ -42,6 +44,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.UndoableEditEvent;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
@@ -99,7 +106,7 @@ public class MainFrame extends AbstractFrame
 	private JMenuItem popupMenu_Undo, popupMenu_Cut, popupMenu_Copy, popupMenu_Paste, popupMenu_Delete, popupMenu_Find,
 			popupMenu_SelectAll;
 	// "文本"编辑区域
-	private JTextArea editArea;
+	private JTextPane editArea;
 	// 状态栏标签
 	private JLabel statusLabel;
 
@@ -160,14 +167,29 @@ public class MainFrame extends AbstractFrame
 		btnEmoji= new JButton(new ImageIcon(MainFrame.class.getResource("/res/表情.png")));
 		// 设置按钮的工具提示文本
 		btnBound.setToolTipText("加粗");
+		btnBound.addActionListener(this);
+		
 		btnItalic.setToolTipText("倾斜");
+		btnItalic.addActionListener(this);
+		
 		btnUnderline.setToolTipText("下划线");
+		btnUnderline.addActionListener(this);
+		
 		btnColor.setToolTipText("字体颜色");
 		btnLine.setToolTipText("文字横线");
+		
 		btnLeft.setToolTipText("左对齐");
+		btnLeft.addActionListener(this);
+		
 		btnCenter.setToolTipText("居中对齐");
+		btnCenter.addActionListener(this);
+		
 		btnRight.setToolTipText("右对齐");
+		btnRight.addActionListener(this);
+		
 		btnPicture.setToolTipText("插图");
+		btnPicture.addActionListener(this);
+		
 		btnEmoji.setToolTipText("插入表情");
 		// 将按钮添加到工具栏中
 		toolBar.add(btnBound);
@@ -408,13 +430,18 @@ public class MainFrame extends AbstractFrame
 		this.add("North",toolBar);
 
 		// 创建文本编辑区并添加滚动条
-		editArea = new JTextArea(20, 50);
+		editArea = new JTextPane() {
+			public boolean getScrollableTracksViewportWidth() {  
+			    return false;  
+			}  
+		};
 		// 设置字体
-		editArea.setFont(new Font("Dialog", Font.PLAIN, 14));
+		editArea.setFont(new Font("微软雅黑", Font.PLAIN, 18));
+		editArea.setPreferredSize(new Dimension(600,200));
 		// 设置换行
-		editArea.setWrapStyleWord(true);
+		//editArea.setWrapStyleWord(true);
 		// 设置文本编辑区自动换行
-		editArea.setLineWrap(true);
+		//editArea.setLineWrap(true);
 		// 添加鼠标监听
 		editArea.addMouseListener(this);
 		// 编辑区注册事件监听(与撤销操作有关)
@@ -588,7 +615,22 @@ public class MainFrame extends AbstractFrame
 	public void actionPerformed(ActionEvent e)
 	{
 		// 判断来源
-		if (e.getSource() == fileMenu_NewDir) {createNewDir();}
+		//工具栏响应事件
+		if (e.getSource() == btnBound) {
+			firstToThird(1);
+		}else if (e.getSource() == btnItalic){
+		    firstToThird(2);	
+		}else if (e.getSource() == btnUnderline) {
+			firstToThird(3);
+		}else if (e.getSource() == btnLeft) {
+			firstToThird(6);
+		}else if (e.getSource() == btnCenter) {
+			firstToThird(7);
+		}else if (e.getSource() == btnRight) {
+			firstToThird(8);
+		}else if (e.getSource() == btnPicture) {
+			insertPicture();
+		}else if (e.getSource() == fileMenu_NewDir) {createNewDir();}
 		else if(e.getSource() == treePopupMenu_NewChildDir) {createNewChildDir();}
 		else if(e.getSource() == treePopupMenu_OpenKnowledge) {openKnowledge();}
 		else if(e.getSource() == treePopupMenu_DeleteChildDir) {deleteChildDir();}
@@ -952,7 +994,16 @@ public class MainFrame extends AbstractFrame
 		// 剪贴板添加文本
 		clipBoard.setContents(selection, null);
 		// 去掉剪切部分
-		editArea.replaceRange("", editArea.getSelectionStart(), editArea.getSelectionEnd());
+		int start = editArea.getSelectionStart();
+		int end = editArea.getSelectionEnd();
+		Document doc = editArea.getDocument();
+		try {
+			doc.remove(start, end-start);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//editArea.replaceRange("", editArea.getSelectionStart(), editArea.getSelectionEnd());
 		// 检查剪切，复制，粘帖，删除功能的可用性
 		checkMenuItemEnabled();
 		// 文本编辑区获取光标
@@ -999,7 +1050,22 @@ public class MainFrame extends AbstractFrame
 			// 获取剪贴板内容
 			text = (String) contents.getTransferData(DataFlavor.stringFlavor);
 			// 粘贴内容
-			editArea.replaceRange(text, editArea.getSelectionStart(), editArea.getSelectionEnd());
+			int start = editArea.getSelectionStart();
+			int end = editArea.getSelectionEnd();
+			Document doc = editArea.getDocument();
+			try {
+				doc.remove(start, end-start);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			try {
+				doc.insertString(start,text,null);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//editArea.replaceRange(text, editArea.getSelectionStart(), editArea.getSelectionEnd());
 			// 检查剪切，复制，粘帖，删除功能的可用性
 			checkMenuItemEnabled();
 		} catch (Exception e)
@@ -1017,7 +1083,16 @@ public class MainFrame extends AbstractFrame
 	private void delete()
 	{
 		// 删除选择部分
-		editArea.replaceRange("", editArea.getSelectionStart(), editArea.getSelectionEnd());
+		int start = editArea.getSelectionStart();
+		int end = editArea.getSelectionEnd();
+		Document doc = editArea.getDocument();
+		try {
+			doc.remove(start, end-start);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//editArea.replaceRange("", editArea.getSelectionStart(), editArea.getSelectionEnd());
 		// 检查剪切、复制、粘贴、删除等功能的可用性
 		checkMenuItemEnabled();
 		// 文本编辑区获取光标
@@ -1058,7 +1133,14 @@ public class MainFrame extends AbstractFrame
 	{
 		Calendar calendar = Calendar.getInstance();
 		Date date = calendar.getTime();
-		editArea.insert(date.toString(), editArea.getCaretPosition());
+		Document doc = editArea.getDocument();
+		try {
+			doc.insertString(editArea.getCaretPosition(),date.toString() , null);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//editArea.insert(date.toString(), editArea.getCaretPosition());
 	}
 
 	/*
@@ -1068,10 +1150,10 @@ public class MainFrame extends AbstractFrame
 	{
 		if (formatMenu_LineWrap.getState())
 		{
-			editArea.setLineWrap(true);
+			//editArea.setLineWrap(true);
 		} else
 		{
-			editArea.setLineWrap(false);
+			//editArea.setLineWrap(false);
 		}
 	}
 
@@ -1329,5 +1411,62 @@ public class MainFrame extends AbstractFrame
              tree=(JTree)in.readObject();
              in.close();
            }catch(Exception er) {}
+	}
+	
+	/*
+	 * 工具栏响应事件
+	 */
+	private void firstToThird(int i) {
+		StyledDocument doc = editArea.getStyledDocument();
+	    int start = editArea.getSelectionStart();
+	    int end  = editArea.getSelectionEnd();
+		String selectedText = editArea.getSelectedText();
+		
+	    try {
+			doc.remove(start, end-start);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    
+	    SimpleAttributeSet attrSet = new SimpleAttributeSet();
+	    switch(i) {
+	    case 1:StyleConstants.setBold(attrSet, true);break;
+	    case 2:StyleConstants.setItalic(attrSet, true);break;
+	    case 3:StyleConstants.setUnderline(attrSet, true);break;
+	    case 6:StyleConstants.setAlignment(attrSet,StyleConstants.ALIGN_LEFT);
+	           doc.setParagraphAttributes(0, doc.getLength(), attrSet, false);
+	           break;
+	    case 7:StyleConstants.setAlignment(attrSet,StyleConstants.ALIGN_CENTER);
+	           doc.setParagraphAttributes(0, doc.getLength(), attrSet, false);
+	           break;
+	    case 8:StyleConstants.setAlignment(attrSet,StyleConstants.ALIGN_RIGHT);
+	           doc.setParagraphAttributes(0, doc.getLength(), attrSet, false);
+	           break;
+	    }
+	    
+	    
+        //StyleConstants.setFontFamily(attrSet, "微软雅黑");
+	    //StyleConstants.setFontSize(attrSet, 18);
+        //StyleConstants.setForeground(attrSet, Color.black); // 颜色
+
+		try {
+			doc.insertString(start, selectedText, attrSet);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
+	/*
+	 * 插入图片
+	 */
+	private void insertPicture() {
+		JFileChooser f = new JFileChooser();
+		f.showOpenDialog(null);
+		StyledDocument doc = editArea.getStyledDocument();
+		editArea.setCaretPosition(doc.getLength()); // 设置插入位置
+	    editArea.insertIcon(new ImageIcon(f.getSelectedFile().getPath())); // 插入图片
+	    
 	}
 }

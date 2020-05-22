@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 import pers.ui.abs.AbstractDialog;
 
@@ -36,14 +37,14 @@ public class ReplaceDialog extends AbstractDialog
 	private JButton replaceButton;
 	private JButton replaceAllButton;
 	private JTextField replaceTextField;
-	private JTextArea editArea;
+	private JTextPane editArea;
 
 	/*
 	 * 构造方法
 	 */
-	private ReplaceDialog(JTextArea editArea)
+	private ReplaceDialog(JTextPane editArea2)
 	{
-		this.editArea = editArea;
+		this.editArea = editArea2;
 		// 初始化界面
 		initUI();
 	}
@@ -51,12 +52,12 @@ public class ReplaceDialog extends AbstractDialog
 	/*
 	 * 获取实例对象
 	 */
-	public static ReplaceDialog getInstance(JTextArea editArea)
+	public static ReplaceDialog getInstance(JTextPane editArea2)
 	{
 		// 为空
 		if (INSTANCE == null)
 		{
-			INSTANCE = new ReplaceDialog(editArea);
+			INSTANCE = new ReplaceDialog(editArea2);
 		}
 
 		// 返回实例对象

@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -38,7 +39,7 @@ public class FontDialog extends AbstractDialog
 	private static final String[] FONT_STYLE = { "常规", "粗体", "斜体", "粗斜体" };
 	private static final String[] FONT_SIZE = { "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26",
 			"28", "36", "48", "72" };
-	private JTextArea editArea;
+	private JTextPane editArea;
 	private JTextField fontTextField;
 	private JTextField styleTextField;
 	private JTextField sizeTextField;
@@ -63,9 +64,9 @@ public class FontDialog extends AbstractDialog
 	/*
 	 * 构造方法
 	 */
-	private FontDialog(JTextArea editArea)
+	private FontDialog(JTextPane editArea2)
 	{
-		this.editArea = editArea;
+		this.editArea = editArea2;
 		// 初始化界面
 		initUI();
 	}
@@ -73,12 +74,12 @@ public class FontDialog extends AbstractDialog
 	/*
 	 * 获取实例对象
 	 */
-	public static FontDialog getInstance(JTextArea editArea)
+	public static FontDialog getInstance(JTextPane editArea2)
 	{
 		// 为空
 		if (INSTANCE == null)
 		{
-			INSTANCE = new FontDialog(editArea);
+			INSTANCE = new FontDialog(editArea2);
 		}
 
 		// 返回实例对象
