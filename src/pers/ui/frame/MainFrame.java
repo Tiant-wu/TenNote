@@ -598,10 +598,20 @@ public class MainFrame extends AbstractFrame
 		else if (e.getSource() == fileMenu_Open){open();}
 		else if (e.getSource() == fileMenu_Save)
 		{
-			// 如果是新文件就保存
-			if (isNewFile){save();}
-			// 否则直接写文件
-			else{FileUtil.writeFile(currentFile, editArea.getText());}
+//			// 如果是新文件就保存
+//			if (isNewFile){save();}
+//			// 否则直接写文件
+//			else{FileUtil.writeFile(currentFile, editArea.getText());}
+			DefaultMutableTreeNode select=(DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
+			String title=select.getUserObject().toString();
+			try {
+				KnowledgeManager.saveKnowledge(new Knowledge(title, editArea.getText()));
+				KnowledgeManager.loadKnowledge();
+				JOptionPane.showMessageDialog(this, "保存成功");
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} else if (e.getSource() == fileMenu_SaveAs)
 		{
 			// 另存为
